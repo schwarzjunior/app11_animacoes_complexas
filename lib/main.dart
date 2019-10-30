@@ -7,7 +7,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: '12 - Animações complexas',
+      title: '11 - Animações complexas',
       home: LogoApp(),
     );
   }
@@ -31,29 +31,36 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
       duration: Duration(seconds: 2),
     );
 
-    animation = Tween<double>(begin: 0, end: 300).animate(controller)
-      ..addListener(() {
-        // Chamado sempre que tiver uma mudanca no valor da animacao.
-        setState(() {});
-      });
+    animation = Tween<double>(begin: 0, end: 300).animate(controller);
 
     controller.forward();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        height: animation.value,
-        width: animation.value,
-        child: FlutterLogo(),
-      ),
-    );
+    return AnimatedLogo(animation);
   }
 
   @override
   void dispose() {
     controller.dispose();
     super.dispose();
+  }
+}
+
+class AnimatedLogo extends AnimatedWidget {
+  AnimatedLogo(Animation<double> animation) : super(listenable: animation);
+
+  Animation<double> get _animation => listenable;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        height: _animation.value,
+        width: _animation.value,
+        child: FlutterLogo(),
+      ),
+    );
   }
 }
