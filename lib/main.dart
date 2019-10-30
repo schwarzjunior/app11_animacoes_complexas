@@ -21,7 +21,6 @@ class LogoApp extends StatefulWidget {
 class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
   AnimationController controller;
   Animation<double> animation;
-  Animation<double> animation2;
 
   @override
   void initState() {
@@ -32,52 +31,32 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
       duration: Duration(seconds: 2),
     );
 
-    animation = Tween<double>(begin: 0, end: 300).animate(controller);
-    animation.addStatusListener((status) {
-      // Chamado sempre o status da animacao tiver mudado.
-      if (status == AnimationStatus.completed) {
-        // Valor da animacao chegou ao final.
-        controller.reverse();
-      } else if (status == AnimationStatus.dismissed) {
-        // Valor da animacao voltou ao valor inicial.
-        controller.forward();
-      }
-    });
-
-    animation2 = Tween<double>(begin: 0, end: 150).animate(controller);
-    animation2.addStatusListener((status) {
-      // Chamado sempre o status da animacao tiver mudado.
-      if (status == AnimationStatus.completed) {
-        // Valor da animacao chegou ao final.
-        controller.reverse();
-      } else if (status == AnimationStatus.dismissed) {
-        // Valor da animacao voltou ao valor inicial.
-        controller.forward();
-      }
-    });
+    animation = CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
+    animation
+      ..addStatusListener((status) {
+        // Chamado sempre o status da animacao tiver mudado.
+        if (status == AnimationStatus.completed) {
+          // Valor da animacao chegou ao final.
+          controller.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          // Valor da animacao voltou ao valor inicial.
+          controller.forward();
+        }
+      })
+      ..addListener(() {
+        print(">>> animation.value: ${animation.value}");
+      });
 
     controller.forward();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Expanded(
-          flex: 1,
-          child: GrowTransition(
-            child: LogoWidget(),
-            animation: animation,
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: GrowTransition(
-            child: LogoWidget(),
-            animation: animation2,
-          ),
-        ),
-      ],
+    return Center(
+      child: GrowAndOpacityTransition(
+        child: LogoWidget(),
+        animation: animation,
+      ),
     );
   }
 
@@ -97,11 +76,13 @@ class LogoWidget extends StatelessWidget {
   }
 }
 
-class GrowTransition extends StatelessWidget {
+class GrowAndOpacityTransition extends StatelessWidget {
   final Widget child;
   final Animation<double> animation;
+  final sizeTween = Tween<double>(begin: 0, end: 300);
+  final opacityTween = Tween<double>(begin: 0.1, end: 1);
 
-  const GrowTransition({Key key, this.child, this.animation}) : super(key: key);
+  GrowAndOpacityTransition({Key key, this.child, this.animation}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -109,10 +90,13 @@ class GrowTransition extends StatelessWidget {
       child: AnimatedBuilder(
         animation: animation,
         builder: (context, child) {
-          return Container(
-            height: animation.value,
-            width: animation.value,
-            child: child,
+          return Opacity(
+            opacity: opacityTween.evaluate(animation).clamp(0.0, 1.0),
+            child: Container(
+              height: sizeTween.evaluate(animation),
+              width: sizeTween.evaluate(animation),
+              child: child,
+            ),
           );
         },
         child: child,
