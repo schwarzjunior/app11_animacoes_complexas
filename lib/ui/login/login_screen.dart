@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     // timeDilation eh usado para alterar o tempo das animacoes, visando
     // a sua melhor visusualizacao.
-    timeDilation = 4;
+    timeDilation = 5;
 
     return Scaffold(
       body: Container(
